@@ -1,7 +1,12 @@
 <template>
-  <header :class="style.headerContainer">
-    <h1 :class="style.header">Disney character browser</h1>
-  </header>
+  <v-app-bar>
+    <div
+      :class="style.headerContainer"
+      class="d-flex justify-center align-center w-100 h-100"
+    >
+      <h1 :class="style.header">Disney character browser</h1>
+    </div>
+  </v-app-bar>
 </template>
 
 <style lang="scss" module="style">
@@ -12,12 +17,6 @@
 
 .headerContainer {
   background: colors.$blue-gradient;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  height: 100px;
 }
 
 .header {
