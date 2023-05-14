@@ -15,7 +15,7 @@
 @use '../scss/fonts';
 @use '../scss/tokens';
 
-.button {
+.button.button {
   background: colors.$blue-gradient;
 
   font-family: fonts.$main-font;

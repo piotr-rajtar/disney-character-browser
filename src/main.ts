@@ -1,12 +1,12 @@
-import { createApp } from "vue";
-import App from "./App.vue";
-import router from "./router";
+import { createApp } from 'vue';
+import App from './App.vue';
 
-// Vuetify
-import "vuetify/styles";
-import { createVuetify } from "vuetify";
-import * as components from "vuetify/components";
-import * as directives from "vuetify/directives";
+//Vuetify
+import 'vuetify/styles';
+import { createVuetify } from 'vuetify';
+import * as components from 'vuetify/components';
+import * as directives from 'vuetify/directives';
+
 
 const vuetify = createVuetify({
   components,
@@ -15,7 +15,6 @@ const vuetify = createVuetify({
 
 const app = createApp(App);
 
-app.use(router);
 app.use(vuetify);
 
 app.mount("#app");
