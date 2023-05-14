@@ -1,6 +1,13 @@
 <template>
-  <v-footer :app="true" class="px-0 py-0">
-    <p class="px-4 py-2 text-center w-100" :class="style.footer">
+  <v-footer
+    :app="true"
+    class="px-0 py-0"
+  >
+    <p
+      :class="style.footer"
+      class="px-4 py-2 text-center w-100"
+      
+    >
       {{ currentYear }} — Piotr Rajtar
     </p>
   </v-footer>
@@ -11,10 +18,10 @@ const currentYear = new Date().getFullYear();
 </script>
 
 <style lang="scss" module="style">
-@use "../scss/colors";
-@use "../scss/fonts";
-@use "../scss/media";
-@use "../scss/tokens";
+@use '../scss/colors';
+@use '../scss/fonts';
+@use '../scss/media';
+@use '../scss/tokens';
 
 .footer {
   background: colors.$blue-gradient;
