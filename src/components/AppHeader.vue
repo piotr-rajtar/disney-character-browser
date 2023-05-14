@@ -22,7 +22,7 @@
 }
 
 .header {
-  font-family: fonts.$header-font;
+  font-family: fonts.$main-font;
   font-size: tokens.$header-font-size-desktop;
   color: colors.$white;
 

@@ -26,7 +26,7 @@ const currentYear = new Date().getFullYear();
 .footer {
   background: colors.$blue-gradient;
 
-  font-family: fonts.$header-font;
+  font-family: fonts.$main-font;
   font-size: tokens.$footer-font-size-desktop;
   color: colors.$white;
 
