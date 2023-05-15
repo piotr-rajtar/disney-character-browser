@@ -64,7 +64,7 @@
     </v-container>
 
     <v-container 
-      class="d-flex flex-wrap flex-sm-column flex-md-row align-sm-center justify-md-start"
+      class="d-flex flex-wrap justify-sm-center justify-md-start"
       :class="style.cardContainer"
     >
       <v-card
