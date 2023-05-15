@@ -14,6 +14,9 @@ const store = createStore({
   },
   getters: {},
   mutations: {
+    clearCharacters(state) {
+      state.characters = [];
+    },
     setCharacters(state, payload) {
       state.characters = payload;
     }
