@@ -1,160 +1,250 @@
 <template>
-  <v-main>
+  <v-main :class="style.mainContainer">
+    <!-- MAIN BUTTON -->
     <v-container class="d-flex align-center justify-center">
-      <v-btn :class="style.button" @click="mainButtonClickHandler">
+      <v-btn 
+        :class="style.button" 
+        @click="mainButtonClickHandler"
+      >
         {{ mainButtonCaption }}
       </v-btn>
     </v-container>
 
-    <v-container v-if="isLoading" class="d-flex align-center justify-center">
+    <!-- INITIAL LOADER -->
+    <v-container 
+      v-if="isLoading" 
+      class="d-flex align-center justify-center"
+    >
       <data-loader  />
     </v-container>
 
-    <v-container v-else-if="isAnyCharacterFetched">
-      <v-form validate-on="submit" @submit.prevent="onFilter">
-        <v-card
-          class="mx-auto pa-5 pb-8"
-          elevation="8"
-          max-width="448"
-          rounded="lg"
-        >
-          <v-card-title class="text-center">Filters</v-card-title>
-
-          <label for="nameSearch" class="text-subtitle-1 text-medium-emphasis">Character name</label>
-
-          <v-text-field
-            id="nameSearch"
-            v-model="searchedCharacterName"
-            clearable
-            density="compact"
-            placeholder="Enter character name"
-            prepend-inner-icon="mdi-magnify"
-          />
-
-          <label for="slider" class="text-subtitle-1 text-medium-emphasis">Items per page</label>
-
-          <v-slider
-            id="slider"
-            v-model="itemsPerPage"
-            :max="MAX_ITEM_QUANTITY_PER_PAGE"
-            :min="MIN_ITEM_QUANTITY_PER_PAGE"
-            class="align-center"
-            color="indigo-darken-4"
-            hide-details
-            step="1"
+    <!-- MAIN DATA CONTAINER -->
+    <v-container v-else-if="wasFetchButtonEverClicked && (isAnyCharacterFetched || isFilteringActive)">
+      <!-- FILTERS -->
+      <v-container>
+        <v-form validate-on="submit" @submit.prevent="debouncedOnFilterClick">
+          <v-card
+            class="mx-auto pa-5 pb-8"
+            elevation="8"
+            max-width="448"
+            rounded="lg"
           >
-            <template #append>
-              <v-text-field
-                v-model="itemsPerPage"
-                :class="style.sliderInput"
-                :max="MAX_ITEM_QUANTITY_PER_PAGE"
-                :min="MIN_ITEM_QUANTITY_PER_PAGE"
-                density="compact"
-                hide-details
-                single-line
-                type="number"
-                @input="onQuantityInput"
-              />
-            </template>
-          </v-slider>
+            <v-card-title class="text-center">Filters</v-card-title>
 
-          <v-card-actions class="d-flex align-center justify-center mt-5">
-            <v-btn type="submit" :class="style.button">
-              Filter
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-form>
+            <label for="nameSearch" class="text-subtitle-1 text-medium-emphasis">Character name</label>
+
+            <v-text-field
+              id="nameSearch"
+              v-model="searchedCharacterName"
+              clearable
+              density="compact"
+              placeholder="Enter character name"
+              prepend-inner-icon="mdi-magnify"
+            />
+
+            <label for="slider" class="text-subtitle-1 text-medium-emphasis">Items per page</label>
+
+            <v-slider
+              id="slider"
+              v-model="itemsPerPage"
+              :max="MAX_ITEM_QUANTITY_PER_PAGE"
+              :min="MIN_ITEM_QUANTITY_PER_PAGE"
+              class="align-center"
+              color="indigo-darken-4"
+              hide-details
+              step="1"
+            >
+              <template #append>
+                <v-text-field
+                  v-model="itemsPerPage"
+                  :class="style.sliderInput"
+                  :max="MAX_ITEM_QUANTITY_PER_PAGE"
+                  :min="MIN_ITEM_QUANTITY_PER_PAGE"
+                  density="compact"
+                  hide-details
+                  single-line
+                  type="number"
+                  @input="onQuantityInput"
+                />
+              </template>
+            </v-slider>
+
+            <v-card-actions 
+              :class="style.filterButtonContainer" 
+              class="d-flex align-center justify-center mt-5"
+            >
+              <v-btn 
+                :class="style.button" 
+                type="submit"
+              >
+                Filter
+              </v-btn>
+              <v-btn 
+                :class="style.resetButton"
+                color="red-darken-4"
+                variant="text"  
+                @click="debouncedOnFilterResetClick"
+              >
+                Clear
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-form>
+      </v-container>
+
+      <!-- FILTERS LOADER -->
+      <v-container 
+        v-if="isFilterLoading" 
+        class="d-flex align-center justify-center"
+      >
+        <data-loader  />
+      </v-container>
+
+      <!-- CARDS AND PAGINATION CONTAINER-->
+      <v-container v-else>
+        <!-- CARDS -->
+        <v-container
+          :class="style.cardContainer"
+          class="d-flex flex-wrap justify-sm-center justify-md-start"
+        >
+          <v-card
+            v-for="character in characters"
+            :key="character._id"
+            class="mx-5 my-5"
+            width="200"
+          >
+            <v-img
+              :src="character.imageUrl"
+              height="200px"
+              cover
+            />
+
+            <v-card-title>
+              {{ character.name }}
+            </v-card-title>
+
+            <v-card-actions>
+              <a :href="character.sourceUrl" target="_blank">
+                <v-btn
+                  color="indigo-darken-4"
+                  variant="text"
+                >
+                  Find out more
+                </v-btn>
+              </a>
+            </v-card-actions>
+          </v-card>
+        </v-container>
+
+        <!-- PAGINATION -->
+        <v-pagination
+          v-if="paginationLength > 1"
+          v-model="pageNumber"
+          :length="paginationLength"
+          class="mb-10"
+          color="indigo-darken-4"
+          rounded="circle"
+        />
+      </v-container>
+
+      <!-- FILTER NO DATA -->
+      <v-container 
+        v-if="!isAnyCharacterFetched && !isFilterResetting" 
+        class="d-flex align-center justify-center"
+      >
+        <no-data>NO DATA FILTERED</no-data>
+      </v-container>
     </v-container>
 
+    <!-- MAIN NO DATA -->
     <v-container 
-      class="d-flex flex-wrap justify-sm-center justify-md-start"
-      :class="style.cardContainer"
+      v-else-if="wasFetchButtonEverClicked && !isAnyCharacterFetched && !isFilteringActive" 
+      class="d-flex align-center justify-center"
     >
-      <v-card
-        v-for="character in characters"
-        :key="character._id"
-        class="mx-5 my-5"
-        width="200"
-      >
-        <v-img
-          :src="character.imageUrl"
-          height="200px"
-          cover
-        />
-
-        <v-card-title>
-          {{ character.name }}
-        </v-card-title>
-
-        <v-card-actions>
-          <a :href="character.sourceUrl" target="_blank">
-            <v-btn
-              color="indigo-darken-4"
-              variant="text"
-            >
-              Find out more
-            </v-btn>
-          </a>
-        </v-card-actions>
-      </v-card>
+      <no-data>NO DATA FETCHED</no-data>
     </v-container>
   </v-main>
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useStore } from 'vuex'
 import { debounce } from 'lodash';
 
 import DataLoader from '../components/DataLoader.vue';
-
+import NoData from '../components/NoData.vue';
+import { formatSearchString } from '../utils';
 import type { FetchCharactersPayload } from '../typings';
 
 const store = useStore();
 
-const MAX_ITEM_QUANTITY_PER_PAGE = 50;
-const MIN_ITEM_QUANTITY_PER_PAGE = 1;
+const isAnyCharacterFetched = computed(() => store.state.characters.length);
+const characters = computed(() => store.state.characters);
+const isLoading = computed(() => store.state.isLoading);
+const paginationLength = computed(() => store.state.totalPages);
 
-const itemsPerPage = ref(10);
 const pageNumber = ref(1);
 
-const searchedCharacterName = ref('');
+watch(pageNumber, async () => {
+  const payload: FetchCharactersPayload = {
+    name: formatSearchString(searchedCharacterName.value),
+    page: pageNumber.value,
+    pageSize: itemsPerPage.value,
+  };
 
-const characters = computed(() => store.state.characters);
+  await store.dispatch('getDifferentPage', payload);
+  window.scrollTo(0, 0);
+});
 
-const isAnyCharacterFetched = computed(() => store.state.characters.length);
+//MAIN BUTTON FUNCTIONALITY
 
-const isLoading = computed(() => store.state.isLoading);
+const wasFetchButtonEverClicked = ref(false);
 
 const mainButtonCaption = computed(() => {
-  return isAnyCharacterFetched.value
+  return wasFetchButtonEverClicked.value
     ? 'Reset'
     : 'Fetch data'
 });
 
 const onReset = () => {
   store.commit('clearCharacters');
+  itemsPerPage.value = 10;
+  pageNumber.value = 1;
+  searchedCharacterName.value = '';
+  wasFetchButtonEverClicked.value = false;
+  isFilteringActive.value = false;
 };
 
-const onFetchClick = (): void => {
+const onFetchClick = async (): Promise<void> => {
   const payload: FetchCharactersPayload = {
     page: pageNumber.value,
     pageSize: itemsPerPage.value,
   };
 
-  store.dispatch('fetchCharacters', payload);
+  await store.dispatch('fetchCharacters', payload);
+  wasFetchButtonEverClicked.value = true;
 };
 
 const debouncedOnFetchClick = debounce(onFetchClick, 300);
 
 const mainButtonClickHandler = computed(() => {
-  return isAnyCharacterFetched.value
+  return wasFetchButtonEverClicked.value
     ? onReset
     : debouncedOnFetchClick
 });
 
-const onQuantityInput = (event: InputEvent) => {
+//FILTERING
+const MAX_ITEM_QUANTITY_PER_PAGE = 50;
+const MIN_ITEM_QUANTITY_PER_PAGE = 1;
+
+const isFilteringActive = ref(false);
+const isFilterResetting = ref(false);
+const searchedCharacterName = ref('');
+const itemsPerPage = ref(10);
+
+const isFilterLoading = computed(() => store.state.isFilterLoading);
+
+const onQuantityInput = (event: InputEvent): void => {
   const quantity = Number((event.target as HTMLInputElement).value);
 
   if(quantity > 50) {
@@ -166,10 +256,37 @@ const onQuantityInput = (event: InputEvent) => {
   }
 };
 
-const onFilter = () => {
-  //TODO: FILTER HANDLING
-  console.log('filter');
+const onFilterClick = async (): Promise<void> => {
+  isFilteringActive.value = true;
+
+  const payload: FetchCharactersPayload = {
+    name: formatSearchString(searchedCharacterName.value),
+    pageSize: itemsPerPage.value,
+  };
+
+  await store.dispatch('filterCharacters', payload);
+  pageNumber.value = 1;
 };
+
+const debouncedOnFilterClick = debounce(onFilterClick, 300);
+
+const onFilterResetClick = async (): Promise<void> => {
+  isFilterResetting.value = true;
+  store.commit('clearCharacters');
+  itemsPerPage.value = 10;
+  pageNumber.value = 1;
+  searchedCharacterName.value = '';
+
+  const payload: FetchCharactersPayload = {
+    name: formatSearchString(searchedCharacterName.value),
+    pageSize: itemsPerPage.value,
+  };
+
+  await store.dispatch('filterCharacters', payload);
+  isFilterResetting.value = false;
+};
+
+const debouncedOnFilterResetClick = debounce(onFilterResetClick, 300);
 </script>
 
 <style lang="scss" module="style">
@@ -177,6 +294,12 @@ const onFilter = () => {
 @use '../scss/fonts';
 @use '../scss/media';
 @use '../scss/tokens';
+
+.filterButtonContainer {
+  @include media.mobile {
+    flex-direction: column;
+  }
+}
 
 .button.button {
   background: colors.$blue-gradient;
@@ -187,6 +310,15 @@ const onFilter = () => {
 
   @include media.mobile {
     width: 100%;
+  }
+}
+
+.resetButton.resetButton {
+  font-family: fonts.$main-font;
+  font-size: tokens.$font-size-default;
+
+  @include media.mobile {
+    margin-top: 10px;
   }
 }
 

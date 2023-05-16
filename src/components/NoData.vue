@@ -4,7 +4,7 @@
     class="d-flex justify-center align-center w-50 h-100"
   >
     <h2 :class="style.text">
-      NO DATA
+      <slot />
     </h2>
   </div>
 </template>

@@ -12,3 +12,11 @@ export const getQueryString = (queryObject: FetchCharactersPayload): string => {
   })
   .join('');
 };
+
+export const formatSearchString = (searchPhrase: string): string => {
+  if(!searchPhrase.length) {
+    return '';
+  }
+  const regex = / +(?= )/g;
+  return searchPhrase.replace(regex,'').trim().replaceAll(' ', '+');
+};
