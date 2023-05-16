@@ -10,6 +10,7 @@ const store = createStore({
   state () {
     return {
       characters: [],
+      isLoading: false,
     };
   },
   getters: {},
@@ -19,16 +20,22 @@ const store = createStore({
     },
     setCharacters(state, payload) {
       state.characters = payload;
-    }
+    },
+    setLoadingStatus(state, payload) {
+      state.isLoading = payload;
+    },
   },
   actions: {
     async fetchCharacters(context, payload: FetchCharactersPayload) {
       try {
+        context.commit('setLoadingStatus', true);
         const queryString = getQueryString(payload);
         const result = await axios.get(`${BASE_URL}?${queryString}`);
+        context.commit('setLoadingStatus', false);
         context.commit('setCharacters', result.data.data);
       }
       catch(error) {
+        context.commit('setLoadingStatus', false);
         console.error('error');
       }
     }

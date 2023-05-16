@@ -6,7 +6,11 @@
       </v-btn>
     </v-container>
 
-    <v-container v-if="isAnyCharacterFetched">
+    <v-container v-if="isLoading" class="d-flex align-center justify-center">
+      <data-loader  />
+    </v-container>
+
+    <v-container v-else-if="isAnyCharacterFetched">
       <v-form validate-on="submit" @submit.prevent="onFilter">
         <v-card
           class="mx-auto pa-5 pb-8"
@@ -50,7 +54,7 @@
                 single-line
                 type="number"
                 @input="onQuantityInput"
-              ></v-text-field>
+              />
             </template>
           </v-slider>
 
@@ -103,6 +107,8 @@ import { computed, ref } from 'vue';
 import { useStore } from 'vuex'
 import { debounce } from 'lodash';
 
+import DataLoader from '../components/DataLoader.vue';
+
 import type { FetchCharactersPayload } from '../typings';
 
 const store = useStore();
@@ -118,6 +124,8 @@ const searchedCharacterName = ref('');
 const characters = computed(() => store.state.characters);
 
 const isAnyCharacterFetched = computed(() => store.state.characters.length);
+
+const isLoading = computed(() => store.state.isLoading);
 
 const mainButtonCaption = computed(() => {
   return isAnyCharacterFetched.value
