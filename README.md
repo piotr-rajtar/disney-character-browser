@@ -16,6 +16,8 @@ After initial fetch, user can:
 
 Number of data fetches is reduced thanks to data caching in store.
 
+Minimum supported mobile width: 320px.
+
 ## Technologies
 * vue.js - version 3.2.45
 * vuex - version 4.0.2
