@@ -107,33 +107,13 @@
           :class="style.cardContainer"
           class="d-flex flex-wrap justify-sm-center justify-md-start"
         >
-          <v-card
+          <character-card
             v-for="character in characters"
             :key="character._id"
-            class="mx-5 my-5"
-            width="200"
-          >
-            <v-img
-              :src="character.imageUrl"
-              height="200px"
-              cover
-            />
-
-            <v-card-title>
-              {{ character.name }}
-            </v-card-title>
-
-            <v-card-actions>
-              <a :href="character.sourceUrl" target="_blank">
-                <v-btn
-                  color="indigo-darken-4"
-                  variant="text"
-                >
-                  Find out more
-                </v-btn>
-              </a>
-            </v-card-actions>
-          </v-card>
+            :image-url="character.imageUrl"
+            :name="character.name"
+            :source-url="character.sourceUrl"
+          />
         </v-container>
 
         <!-- PAGINATION -->
@@ -173,6 +153,7 @@ import type { ComputedRef } from 'vue';
 import { useStore } from 'vuex'
 import { debounce } from 'lodash';
 
+import CharacterCard from '@/components/CharacterCard.vue';
 import DataLoader from '../components/DataLoader.vue';
 import NoData from '../components/NoData.vue';
 import { formatSearchString } from '../utils';
