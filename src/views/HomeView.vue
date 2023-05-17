@@ -19,7 +19,7 @@
     </v-container>
 
     <!-- MAIN DATA CONTAINER -->
-    <v-container v-else-if="wasFetchButtonEverClicked && (isAnyCharacterFetched || isFilteringActive)">
+    <v-container v-else-if="isMainDataContainerVisible">
       <!-- FILTERS -->
       <v-container>
         <v-form validate-on="submit" @submit.prevent="debouncedOnFilterClick">
@@ -158,7 +158,7 @@
 
     <!-- MAIN NO DATA -->
     <v-container 
-      v-else-if="wasFetchButtonEverClicked && !isAnyCharacterFetched && !isFilteringActive" 
+      v-else-if="isMainNoDataComponentVisible" 
       class="d-flex align-center justify-center"
     >
       <no-data>NO DATA FETCHED</no-data>
@@ -168,20 +168,16 @@
 
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue';
+import type { ComputedRef } from 'vue';
 import { useStore } from 'vuex'
 import { debounce } from 'lodash';
 
 import DataLoader from '../components/DataLoader.vue';
 import NoData from '../components/NoData.vue';
 import { formatSearchString } from '../utils';
-import type { FetchCharactersPayload } from '../typings';
+import type { Character, FetchCharactersPayload } from '../typings';
 
 const store = useStore();
-
-const isAnyCharacterFetched = computed(() => store.state.characters.length);
-const characters = computed(() => store.state.characters);
-const isLoading = computed(() => store.state.isLoading);
-const paginationLength = computed(() => store.state.totalPages);
 
 const pageNumber = ref(1);
 
@@ -196,6 +192,11 @@ watch(pageNumber, async () => {
   window.scrollTo(0, 0);
 });
 
+const isAnyCharacterFetched: ComputedRef<boolean> = computed(() => !!store.state.characters.length);
+const characters: ComputedRef<Character[]> = computed(() => store.state.characters);
+const isLoading: ComputedRef<boolean> = computed(() => store.state.isLoading);
+const paginationLength: ComputedRef<number> = computed(() => store.state.totalPages);
+
 //MAIN BUTTON FUNCTIONALITY
 
 const wasFetchButtonEverClicked = ref(false);
@@ -208,9 +209,7 @@ const mainButtonCaption = computed(() => {
 
 const onReset = () => {
   store.commit('clearCharacters');
-  itemsPerPage.value = 10;
-  pageNumber.value = 1;
-  searchedCharacterName.value = '';
+  clearFilterData();
   wasFetchButtonEverClicked.value = false;
   isFilteringActive.value = false;
 };
@@ -244,6 +243,12 @@ const itemsPerPage = ref(10);
 
 const isFilterLoading = computed(() => store.state.isFilterLoading);
 
+const clearFilterData = (): void => {
+  itemsPerPage.value = 10;
+  pageNumber.value = 1;
+  searchedCharacterName.value = '';
+};
+
 const onQuantityInput = (event: InputEvent): void => {
   const quantity = Number((event.target as HTMLInputElement).value);
 
@@ -272,9 +277,7 @@ const debouncedOnFilterClick = debounce(onFilterClick, 300);
 
 const onFilterResetClick = async (): Promise<void> => {
   isFilterResetting.value = true;
-  itemsPerPage.value = 10;
-  pageNumber.value = 1;
-  searchedCharacterName.value = '';
+  clearFilterData();
 
   const payload: FetchCharactersPayload = {
     name: formatSearchString(searchedCharacterName.value),
@@ -286,6 +289,14 @@ const onFilterResetClick = async (): Promise<void> => {
 };
 
 const debouncedOnFilterResetClick = debounce(onFilterResetClick, 300);
+
+const isMainDataContainerVisible: ComputedRef<boolean> = computed(() => {
+  return wasFetchButtonEverClicked.value && (isAnyCharacterFetched.value || isFilteringActive.value);
+});
+
+const isMainNoDataComponentVisible: ComputedRef<boolean> = computed(() => {
+  return wasFetchButtonEverClicked.value && !isAnyCharacterFetched.value && !isFilteringActive.value;
+});
 </script>
 
 <style lang="scss" module="style">
