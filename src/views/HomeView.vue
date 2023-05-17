@@ -137,14 +137,14 @@
         </v-container>
 
         <!-- PAGINATION -->
-        <v-pagination
-          v-if="paginationLength > 1"
-          v-model="pageNumber"
-          :length="paginationLength"
-          class="mb-10"
-          color="indigo-darken-4"
-          rounded="circle"
-        />
+        <v-container v-if="paginationLength > 1" class="mb-10">
+          <v-pagination
+            v-model="pageNumber"
+            :length="paginationLength"
+            color="indigo-darken-4"
+            rounded="circle"
+          />
+        </v-container>
       </v-container>
 
       <!-- FILTER NO DATA -->
