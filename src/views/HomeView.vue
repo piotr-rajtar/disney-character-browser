@@ -272,7 +272,6 @@ const debouncedOnFilterClick = debounce(onFilterClick, 300);
 
 const onFilterResetClick = async (): Promise<void> => {
   isFilterResetting.value = true;
-  store.commit('clearCharacters');
   itemsPerPage.value = 10;
   pageNumber.value = 1;
   searchedCharacterName.value = '';
