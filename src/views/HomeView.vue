@@ -140,6 +140,7 @@
         <v-container v-if="paginationLength > 1" class="mb-10">
           <v-pagination
             v-model="pageNumber"
+            :disabled="isPageLoading"
             :length="paginationLength"
             color="indigo-darken-4"
             rounded="circle"
@@ -181,6 +182,8 @@ const store = useStore();
 
 const pageNumber = ref(1);
 
+const isPageLoading: ComputedRef<boolean> = computed(() => store.state.isPageLoading);
+
 watch(pageNumber, async () => {
   const payload: FetchCharactersPayload = {
     name: formatSearchString(searchedCharacterName.value),
@@ -188,7 +191,7 @@ watch(pageNumber, async () => {
     pageSize: itemsPerPage.value,
   };
 
-  await store.dispatch('getDifferentPage', payload);
+  await store.dispatch('getChosenPage', payload);
   window.scrollTo(0, 0);
 });
 
