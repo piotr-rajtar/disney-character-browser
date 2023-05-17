@@ -2,7 +2,7 @@ import { createStore } from 'vuex';
 import axios from 'axios';
 
 import type { FetchCharactersPayload, RootState } from '../typings';
-import { getQueryString } from '../utils';
+import { getErrorMessage, getQueryString } from '../utils';
 
 import { BASE_URL } from './const';
 
@@ -12,6 +12,7 @@ const store = createStore<RootState>({
       characters: [],
       isLoading: false,
       isFilterLoading: false,
+      isPageLoading: false,
       totalPages: 0,
     };
   },
@@ -34,48 +35,52 @@ const store = createStore<RootState>({
     setLoadingStatus(state, payload) {
       state.isLoading = payload;
     },
+    setPageLoadingStatus(state, payload) {
+      state.isPageLoading = payload;
+    },
     setTotalPages(state, payload) {
       state.totalPages = payload;
     },
   },
   actions: {
-    async fetchCharacters(context, payload: FetchCharactersPayload) {
+    async fetchData(context, payload: FetchCharactersPayload) {
+      const queryString = getQueryString(payload);
       try {
-        context.commit('setLoadingStatus', true);
-        const queryString = getQueryString(payload);
         const result = await axios.get(`${BASE_URL}?${queryString}`);
+        return result.data;
+      } catch(error) {
         context.commit('setLoadingStatus', false);
-        context.commit('setCharacters', result.data.data);
-        context.commit('setTotalPages', result.data.info.totalPages);
+        getErrorMessage(error);
       }
-      catch(error) {
+    },
+    async fetchCharacters(context, payload: FetchCharactersPayload) {
+        context.commit('setLoadingStatus', true);
+
+        const result = await context.dispatch('fetchData', payload);
+
+        context.commit('setCharacters', result.data);
+        context.commit('setTotalPages', result.info.totalPages);
+       
         context.commit('setLoadingStatus', false);
-        console.error('error');
-      }
     },
     async filterCharacters(context, payload: FetchCharactersPayload) {
-      try {
-        context.commit('setFilterLoadingStatus', true);
-        const queryString = getQueryString(payload);
-        const result = await axios.get(`${BASE_URL}?${queryString}`);
-        context.commit('setFilterLoadingStatus', false);
-        context.commit('setCharacters', result.data.data);
-        context.commit('setTotalPages', result.data.info.totalPages);
-      }
-      catch(error) {
-        context.commit('setFilterLoadingStatus', false);
-        console.error('error');
-      }
+      context.commit('setFilterLoadingStatus', true);
+
+      const result = await context.dispatch('fetchData', payload);
+
+      context.commit('setCharacters', result.data);
+      context.commit('setTotalPages', result.info.totalPages);
+     
+      context.commit('setFilterLoadingStatus', false);
     },
-    async getDifferentPage(context, payload: FetchCharactersPayload) {
-      try {
-        const queryString = getQueryString(payload);
-        const result = await axios.get(`${BASE_URL}?${queryString}`);
-        context.commit('setCharacters', result.data.data);
-      }
-      catch(error) {
-        console.error('error');
-      }
+    async getChosenPage(context, payload: FetchCharactersPayload) {
+      context.commit('setPageLoadingStatus', true);
+
+      const result = await context.dispatch('fetchData', payload);
+
+      context.commit('setCharacters', result.data);
+
+      context.commit('setPageLoadingStatus', false);
     },
   },
 });

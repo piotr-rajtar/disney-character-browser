@@ -23,7 +23,8 @@ export interface FetchCharactersPayload {
 
 export interface RootState {
   characters: Array<Character>;
-  isLoading: boolean;
   isFilterLoading: boolean;
+  isLoading: boolean;
+  isPageLoading: boolean;
   totalPages: number;
 }
