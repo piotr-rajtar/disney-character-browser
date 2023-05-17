@@ -1,3 +1,13 @@
+interface CachedData {
+  data: Character[];
+  info: { totalPages: number };
+}
+
+export interface CachedRequest {
+  queryKey: string;
+  data: CachedData;
+}
+
 export interface Character {
   allies: string[];
   createdAt: string;
@@ -22,6 +32,7 @@ export interface FetchCharactersPayload {
 }
 
 export interface RootState {
+  cachedRequest: { [key: string]: CachedData };
   characters: Array<Character>;
   isFilterLoading: boolean;
   isLoading: boolean;
