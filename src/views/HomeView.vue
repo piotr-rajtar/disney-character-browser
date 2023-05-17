@@ -182,7 +182,6 @@ const isLoading: ComputedRef<boolean> = computed(() => store.state.isLoading);
 const paginationLength: ComputedRef<number> = computed(() => store.state.totalPages);
 
 //MAIN BUTTON FUNCTIONALITY
-
 const wasFetchButtonEverClicked = ref(false);
 
 const mainButtonCaption = computed(() => {
